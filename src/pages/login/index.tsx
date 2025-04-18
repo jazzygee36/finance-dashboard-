@@ -7,7 +7,11 @@ const Login = () => {
     <div className='flex flex-col items-center justify-center h-screen bg-[#F8FAFB]'>
       <h1 className='text-2xl font-bold text-gray-800'>Admin Login</h1>
       <div className='my-4 w-[90%] md:w-[30%]'>
-        <HomeInput type={'password'} placeholder={'Enter admin password'} />
+        <HomeInput
+          type={'password'}
+          placeholder={'Enter admin password'}
+          value='12345'
+        />
       </div>
 
       <div className='mt-2 w-[90%] md:w-[30%]'>
