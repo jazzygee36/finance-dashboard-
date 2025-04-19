@@ -16,6 +16,7 @@ export interface InputProps {
   name?: string;
   value?: string;
   border?: string;
+  readOnly?: boolean;
   onChange?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
