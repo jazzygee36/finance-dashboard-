@@ -59,8 +59,10 @@ const EditForm = () => {
   };
 
   return (
-    <div className='p-4'>
-      <h1 className='font-medium my-8  block text-center'>ADMIN SETTINGS</h1>
+    <div className='p-4 md:p-6'>
+      <h1 className='font-bold my-8  block text-center text-gray-900'>
+        ADMIN SETTINGS
+      </h1>
       <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-7 w-full '>
         <div className='   flex items-center gap-1 md:gap-10 w-[100%]'>
           <div className='w-full'>
@@ -89,7 +91,7 @@ const EditForm = () => {
           </div>
         </div>
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-7 my-7 w-full '>
+      <div className='grid grid-cols-2 items-center gap-7 my-7 w-full '>
         <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%] '>
           <div className='w-[100%]'>
             <SelectInput option={[]} name={''} label='Gender' />
@@ -283,7 +285,7 @@ const EditForm = () => {
           </div>
         </div>
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-7 my-7 w-full '>
+      <div className='grid grid-cols-2 items-center gap-7 my-7 w-full '>
         <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%] '>
           <div className='w-[100%]'>
             <SelectInput option={[]} name={''} label='Account Status' />
@@ -295,7 +297,7 @@ const EditForm = () => {
           </div>
         </div>
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-7 my-7 w-full '>
+      <div className='grid grid-cols-2 items-center gap-7 my-7 w-full '>
         <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%] '>
           <div className='w-[100%]'>
             <SelectInput option={[]} name={''} label='Currency' />

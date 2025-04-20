@@ -86,9 +86,11 @@ const UserRow = ({
   user,
   onEdit,
   onDelete,
+  onEditStatement,
 }: {
   user: (typeof UsersDetails)[number];
   onEdit: (user: (typeof UsersDetails)[number]) => void;
+  onEditStatement: (user: (typeof UsersDetails)[number]) => void;
   onDelete: (user: (typeof UsersDetails)[number]) => void;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -120,7 +122,10 @@ const UserRow = ({
               >
                 Edit
               </li>
-              <li className='px-4 py-2 hover:bg-gray-100 cursor-pointer'>
+              <li
+                onClick={() => onEditStatement(user)}
+                className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+              >
                 Statement
               </li>
               <li
@@ -199,8 +204,13 @@ const HomePage = () => {
 
   const handleEditForm = (item: any) => {
     setSelectedUserForEdit(item);
-    navigate('/editform', { state: { user: item } });
+    navigate('/edit-form', { state: { user: item } });
   };
+
+  const handleEditStatement = (item: any) => {
+    navigate('/edit-statement', { state: { user: item } });
+  };
+
   function onDelete(user: (typeof UsersDetails)[number]): void {
     handleDelete(user);
   }
@@ -225,6 +235,7 @@ const HomePage = () => {
                   key={user.id}
                   user={user}
                   onEdit={handleEditForm}
+                  onEditStatement={handleEditStatement}
                   onDelete={handleDelete}
                 />
               ))}
@@ -261,6 +272,7 @@ const HomePage = () => {
                   type='submit'
                   bg='blue'
                   width='100%'
+                  onClick={() => handleEditStatement(item)}
                 />
                 <HomeButton
                   title='Delete '

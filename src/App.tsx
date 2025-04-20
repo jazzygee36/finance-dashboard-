@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './pages/login';
 import HomePage from './pages/home';
 import EditForm from './pages/form';
+import EditAccountStatement from './pages/accountStatement.tsx';
 
 const App = () => {
   return (
@@ -11,7 +12,8 @@ const App = () => {
         <Route path='/' element={<Navigate to='/login' />} />
         <Route path='/login' element={<Login />} />
         <Route path='/dashboard' element={<HomePage />} />
-        <Route path='/editform' element={<EditForm />} />
+        <Route path='/edit-form' element={<EditForm />} />
+        <Route path='/edit-statement' element={<EditAccountStatement />} />
       </Routes>
     </BrowserRouter>
   );
