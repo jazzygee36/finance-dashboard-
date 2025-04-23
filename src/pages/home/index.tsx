@@ -2,96 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import HomeButton from '../../components/button';
 import MainDashboard from '../../components/dashboard';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const UsersDetails = [
-  {
-    id: 1,
-    name: 'Sainty Gray',
-    username: 'Sainty@005',
-    dob: '01-06-1966',
-    gender: 'Male',
-    occup: 'artisan',
-    address: '2002 Shoreline Dr, 94501, Alameda , CA ',
-    email: 'saintgray193@gmail.com',
-    pwd: 'Huntman@@## ',
-    otp: 'Nul',
-    pin: '1111',
-    Tac: '6375362',
-    DWTC: ' 43636525',
-    TXC: ' 2425566',
-    acctType: 'Current Account',
-    acctNumber: '  003994415280',
-    currentBalance: ' 700000',
-  },
-  {
-    id: 2,
-    name: 'Dennis Gianneschi',
-    username: 'Sainty@007',
-    dob: '01-06-1966',
-    gender: 'Male',
-    occup: 'Programmer',
-    address: '2002 Shoreline Dr, 94501, Alameda , CA ',
-    email: 'saintgray193@gmail.com',
-    pwd: 'Huntman@@## ',
-    otp: 'Nul',
-    pin: '1111',
-    Tac: '6375362',
-    DWTC: ' 43636525',
-    TXC: ' 2425566',
-    acctType: 'Current Account',
-    acctNumber: '  003994415280',
-    currentBalance: ' 700000',
-  },
-  {
-    id: 3,
-    name: 'Leslie Ferguson',
-    username: 'Sainty@003',
-    dob: '09-06-1970',
-    gender: 'female',
-    occup: 'Dealer',
-    address: '1002 Shoreline Dr, 94501, Alameda , CA ',
-    email: 'saintgray193@gmail.com',
-    pwd: 'Huntman@@## ',
-    otp: 'Nul',
-    pin: '1111',
-    Tac: '6375362',
-    DWTC: ' 43636525',
-    TXC: ' 2425566',
-    acctType: 'Current Account',
-    acctNumber: '  003994415280',
-    currentBalance: ' 700000',
-  },
-  {
-    id: 4,
-    name: 'Leon Edelmira',
-    username: 'Sainty@009',
-    dob: '01-06-1966',
-    gender: 'Male',
-    occup: 'artisan',
-    address: '2002 Shoreline Dr, 94501, Alameda , CA ',
-    email: 'saintgray193@gmail.com',
-    pwd: 'Huntman@@## ',
-    otp: 'Nul',
-    pin: '1111',
-    Tac: '6375362',
-    DWTC: ' 43636525',
-    TXC: ' 2425566',
-    acctType: 'Current Account',
-    acctNumber: '  003994415280',
-    currentBalance: ' 700000',
-  },
-];
-
+// UserRow component
 const UserRow = ({
   user,
   onEdit,
   onDelete,
   onEditStatement,
 }: {
-  user: (typeof UsersDetails)[number];
-  onEdit: (user: (typeof UsersDetails)[number]) => void;
-  onEditStatement: (user: (typeof UsersDetails)[number]) => void;
-  onDelete: (user: (typeof UsersDetails)[number]) => void;
+  user: any;
+  onEdit: (user: any) => void;
+  onEditStatement: (user: any) => void;
+  onDelete: (user: any) => void;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLTableDataCellElement | null>(null);
@@ -108,8 +31,9 @@ const UserRow = ({
 
   return (
     <tr className='border-b border-gray-200 relative'>
-      <td className='p-2'>{user.id}</td>
-      <td className='p-2'>{user.name}</td>
+      <td className='p-2'>
+        {user.firstName} {user.lastName}
+      </td>
       <td className='p-2'>{user.username}</td>
       <td className='p-2 text-blue-600 cursor-pointer relative' ref={menuRef}>
         <span onClick={() => setIsMenuOpen(!isMenuOpen)}>View</span>
@@ -142,6 +66,7 @@ const UserRow = ({
   );
 };
 
+// Delete Modal
 const DeleteModal = ({
   onConfirm,
   onCancel,
@@ -149,16 +74,16 @@ const DeleteModal = ({
 }: {
   onConfirm: () => void;
   onCancel: () => void;
-  user: (typeof UsersDetails)[number] | null;
+  user: any | null;
 }) => {
   if (!user) return null;
 
   return (
-    <div className='fixed inset-0 flex items-center justify-center  bg-black/50 bg-opacity-50 z-50'>
+    <div className='fixed inset-0 flex items-center justify-center bg-black/50 z-50'>
       <div className='bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md'>
         <h2 className='text-lg font-semibold mb-4'>Confirm Deletion</h2>
         <p>
-          Are you sure you want to delete <strong>{user.name}</strong>?
+          Are you sure you want to delete <strong>{user.username}</strong>?
         </p>
         <div className='mt-6 flex justify-end gap-4'>
           <button
@@ -179,46 +104,57 @@ const DeleteModal = ({
   );
 };
 
+// HomePage
 const HomePage = () => {
   const navigate = useNavigate();
-  const [, setSelectedUserForEdit] = useState<number | null>(null);
-  const [userToDelete, setUserToDelete] = useState<
-    (typeof UsersDetails)[number] | null
-  >(null);
-  const [, setUsers] = useState(UsersDetails); // Make a mutable list of users
+  const [users, setUsers] = useState<any[]>([]);
+  const [userToDelete, setUserToDelete] = useState<any | null>(null);
 
-  const handleDelete = (user: (typeof UsersDetails)[number]) => {
-    setUserToDelete(user);
-  };
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/user/all-users`
+        );
+        // Ensure `id` is used instead of `_id`
+        const normalizedUsers = res.data.map((user: any) => ({
+          ...user,
+          id: user._id,
+        }));
+        setUsers(normalizedUsers);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
 
-  const confirmDelete = () => {
-    if (userToDelete) {
+    fetchUsers();
+  }, []);
+
+  const handleEditForm = (user: any) =>
+    navigate('/edit-form', { state: { user } });
+  const handleEditStatement = (user: any) =>
+    navigate('/edit-statement', { state: { user } });
+  const handleDelete = (user: any) => setUserToDelete(user);
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BASE_URL}/user/delete-user/${userToDelete.id}`
+      );
       setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
       setUserToDelete(null);
+    } catch (error) {
+      console.error('Error deleting user:', error);
     }
   };
 
-  const cancelDelete = () => {
-    setUserToDelete(null);
-  };
-
-  const handleEditForm = (item: any) => {
-    setSelectedUserForEdit(item);
-    navigate('/edit-form', { state: { user: item } });
-  };
-
-  const handleEditStatement = (item: any) => {
-    navigate('/edit-statement', { state: { user: item } });
-  };
-
-  function onDelete(user: (typeof UsersDetails)[number]): void {
-    handleDelete(user);
-  }
+  const cancelDelete = () => setUserToDelete(null);
 
   return (
     <MainDashboard title={'Dashboard'}>
       <div className='mt-4 w-full'>
-        {/* Table for medium+ screens */}
+        {/* Desktop Table */}
         <div className='hidden md:block overflow-x-auto rounded-lg'>
           <table className='min-w-[600px] w-full'>
             <thead className='bg-gray-200'>
@@ -226,11 +162,10 @@ const HomePage = () => {
                 <th className='p-2 font-medium text-left'>S/N</th>
                 <th className='p-2 font-medium text-left'>Name</th>
                 <th className='p-2 font-medium text-left'>Username</th>
-                <th className='p-2 font-medium text-left'>More</th>
               </tr>
             </thead>
             <tbody>
-              {UsersDetails.map((user) => (
+              {users.map((user) => (
                 <UserRow
                   key={user.id}
                   user={user}
@@ -243,49 +178,51 @@ const HomePage = () => {
           </table>
         </div>
 
-        {/* Card layout for mobile screens */}
+        {/* Mobile View */}
         <div className='md:hidden flex flex-col gap-4'>
-          {UsersDetails.map((item, index) => (
+          {users.map((user, index) => (
             <div
               key={index}
               className='border border-gray-200 rounded-lg p-4 shadow-sm bg-white'
             >
               <div className='flex items-center justify-between'>
                 <h4>Name</h4>
-                <h4 className='font-semibold text-gray-800'>{item.name}</h4>
+                <h4 className='font-semibold text-gray-800'>
+                  {user.firstName} {user.lastName}
+                </h4>
               </div>
               <div className='flex items-center justify-between my-4'>
                 <h4>Username</h4>
-                <h4 className='font-semibold text-gray-800'>{item.username}</h4>
+                <h4 className='font-semibold text-gray-800'>{user.username}</h4>
               </div>
-
               <div className='flex flex-col items-center justify-between gap-2 mt-4'>
                 <HomeButton
-                  title='Edit Account '
+                  title='Edit Account'
                   type='submit'
                   bg='gray'
                   width='100%'
-                  onClick={() => handleEditForm(item)}
+                  onClick={() => handleEditForm(user)}
                 />
                 <HomeButton
-                  title=' Account Statement'
+                  title='Account Statement'
                   type='submit'
                   bg='blue'
                   width='100%'
-                  onClick={() => handleEditStatement(item)}
+                  onClick={() => handleEditStatement(user)}
                 />
                 <HomeButton
-                  title='Delete '
+                  title='Delete'
                   type='submit'
                   bg='red'
                   width='100%'
-                  onClick={() => onDelete(item)}
+                  onClick={() => handleDelete(user)}
                 />
               </div>
             </div>
           ))}
         </div>
       </div>
+
       <DeleteModal
         user={userToDelete}
         onConfirm={confirmDelete}

@@ -3,59 +3,128 @@ import HomeButton from '../../components/button';
 import HomeInput from '../../components/input';
 import SelectInput from '../../components/selectInput';
 import { useLocation } from 'react-router-dom';
+import { Currencies } from '../../utils/currency';
+import axios from 'axios';
 
 const EditForm = () => {
   const location = useLocation();
   const user = location.state?.user;
+  const userId = user?._id;
+  console.log('userId', user._id);
+
+  const genderOptions = [
+    { value: 'Male', label: 'Male' },
+    { value: 'Female', label: 'Female' },
+    { value: 'Other', label: 'Other' },
+  ];
+
+  const settingsOptions = [
+    { value: '', label: '0' },
+    { value: 'ON', label: 'ON' },
+    { value: 'OFF', label: 'OFF' },
+  ];
+  const statusOptions = [
+    { value: '', label: 'Select status' },
+    { value: 'Active', label: 'Active' },
+    { value: 'In-Active', label: 'In-Active' },
+    { value: 'Dormant', label: 'Dormant' },
+  ];
+
+  const errorOptions = [
+    { value: '', label: '0' },
+    { value: 'OFF', label: 'OFF' },
+    { value: 'Tac-error', label: 'TAC-Error' },
+    { value: 'DWTC-error', label: 'DWTC-Error' },
+    { value: 'Tax-error', label: 'Tax-Error' },
+  ];
+  const maritalStatusOptions = [
+    { value: 'Null', label: 'Null' },
+    { value: 'Single', label: 'Single' },
+    { value: 'Married', label: 'Married' },
+    { value: 'Divorced', label: 'Divorced' },
+    { value: 'Widowed', label: 'Widowed' },
+  ];
 
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     username: '',
     email: '',
     dob: '',
     gender: '',
-    occup: '',
+    occupation: '',
     address: '',
-    pwd: '',
+    password: '',
     otp: '',
-    pin: '',
-    Tac: '',
-    DWTC: '',
+    acctPin: '',
+    tacCode: '',
+    dwtcCode: '',
     TXC: '',
     acctType: '',
     acctNumber: '',
     currentBalance: '',
+    phoneNumber: '',
+    country: '',
+    state: '',
+    status: '',
+    currency: '',
+    settings: '',
+    error: '',
     // Add other fields as needed
   });
   useEffect(() => {
     if (user) {
       setFormData({
         ...formData,
-        name: user.name || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
         username: user.username || '',
         email: user.email || '',
         dob: user.dob || '',
-        pwd: user.pwd || '',
+        password: user.password || '',
         address: user.address || '',
         gender: user.gender || '',
-        occup: user.occup || '',
+        occupation: user.occupation || '',
         otp: user.otp || '',
-        pin: user.pin || '',
-        Tac: user.Tac || '',
-        DWTC: user.DWTC || '',
+        acctPin: user.acctPin || '',
+        tacCode: user.tacCode || '',
+        dwtcCode: user.dwtcCode || '',
         TXC: user.TXC || '',
         acctType: user.acctType || '',
         acctNumber: user.acctNumber || '',
         currentBalance: user.currentBalance || '',
+        phoneNumber: user.phoneNumber || '',
+        country: user.country || '',
+        state: user.state || '',
+        status: user.status || '',
+        currency: user.currency || '',
+        settings: user.settings || '',
+        error: user.error || '',
         // Map other fields accordingly
       });
     }
   }, [user]);
+  const formattedDOB = formData.dob
+    ? new Date(formData.dob).toISOString().split('T')[0]
+    : '';
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const [editProfile, setEditprofile] = useState('');
+  console.log('editProfile', editProfile);
+
+  const handleUpdateAccount = async () => {
+    try {
+      const res = await axios.patch(
+        `${import.meta.env.VITE_BASE_URL}/user/update-user/${userId}`
+      );
+      setEditprofile(res.data.message);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
   };
 
   return (
@@ -71,8 +140,9 @@ const EditForm = () => {
               placeholder={''}
               label='Names'
               name='name'
-              value={formData.name}
+              value={`${formData.firstName} ${formData.lastName}`.trim()}
               onChange={handleChange}
+              readOnly
             />
           </div>
         </div>
@@ -84,23 +154,63 @@ const EditForm = () => {
                 placeholder={''}
                 label='Date of Birth'
                 name='dob'
-                value={formData.dob}
+                value={formattedDOB}
                 onChange={handleChange}
+                readOnly
               />
             </div>
           </div>
         </div>
       </div>
-      <div className='grid grid-cols-2 items-center gap-7 my-7 w-full '>
+      <div className='grid grid-cols-2 items-center gap-7 mt-7 mb-5 w-full '>
         <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%] '>
           <div className='w-[100%]'>
-            <SelectInput option={[]} name={''} label='Gender' />
+            <SelectInput
+              option={genderOptions}
+              name='gender'
+              label='Gender'
+              value={formData.gender}
+              onChange={handleChange}
+            />
           </div>
         </div>
         <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%]'>
           <div className='w-[100%]'>
-            <SelectInput option={[]} name={''} label='Marital status' />
+            <SelectInput
+              option={maritalStatusOptions}
+              name='maritalStatus'
+              label='Marital Status'
+              // value={formData.maritalStatus}
+              onChange={handleChange}
+            />
           </div>
+        </div>
+      </div>
+      <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-7 mb-7  w-full'>
+        <div className='  flex items-center gap-1 md:gap-10 w-[100%] '>
+          <div className='w-[100%]'>
+            <HomeInput
+              type={'text'}
+              placeholder={''}
+              label='Country'
+              name='country'
+              value={formData.country}
+              onChange={handleChange}
+              readOnly
+            />
+          </div>
+        </div>
+
+        <div className='w-full'>
+          <HomeInput
+            type={'text'}
+            placeholder={''}
+            label='State'
+            name='state'
+            value={formData.state}
+            onChange={handleChange}
+            readOnly={true}
+          />
         </div>
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-7  items-center  w-full'>
@@ -111,8 +221,9 @@ const EditForm = () => {
               placeholder={''}
               label='Occupation'
               name='occup'
-              value={formData.occup}
+              value={formData.occupation}
               onChange={handleChange}
+              readOnly
             />
           </div>
         </div>
@@ -125,6 +236,7 @@ const EditForm = () => {
               name='address'
               value={formData.address}
               onChange={handleChange}
+              readOnly
             />
           </div>
         </div>
@@ -133,7 +245,15 @@ const EditForm = () => {
       <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-7 my-7  w-full'>
         <div className='  flex items-center gap-1 md:gap-10 w-[100%] '>
           <div className='w-[100%]'>
-            <HomeInput type={'text'} placeholder={''} label='Mobile tel' />
+            <HomeInput
+              type={'text'}
+              placeholder={''}
+              label='Mobile tel'
+              name='phoneNumber'
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              readOnly
+            />
           </div>
         </div>
 
@@ -170,8 +290,8 @@ const EditForm = () => {
               type={'text'}
               placeholder={''}
               label='Password'
-              name='pwd'
-              value={formData.pwd}
+              name='password'
+              value={formData.password}
               onChange={handleChange}
               readOnly={true}
             />
@@ -198,8 +318,8 @@ const EditForm = () => {
               type={'text'}
               placeholder={''}
               label='Online Pin'
-              name='pin'
-              value={formData.pin}
+              name='acctPin'
+              value={formData.acctPin}
               onChange={handleChange}
               readOnly={true}
             />
@@ -213,8 +333,8 @@ const EditForm = () => {
               type={'text'}
               placeholder={''}
               label='Transfer TAC code'
-              name='Tac'
-              value={formData.Tac}
+              name='tacCode'
+              value={formData.tacCode}
               onChange={handleChange}
             />
           </div>
@@ -226,8 +346,8 @@ const EditForm = () => {
               placeholder={''}
               label='Transfer DWTC code
 '
-              name='DWTC'
-              value={formData.DWTC}
+              name='dwtcCode'
+              value={formData.dwtcCode}
               onChange={handleChange}
             />
           </div>
@@ -240,7 +360,8 @@ const EditForm = () => {
               type={'text'}
               placeholder={''}
               label='Transfer TXC code'
-              name='TXC'
+              name='tacCode
+'
               value={formData.TXC}
               onChange={handleChange}
             />
@@ -255,6 +376,7 @@ const EditForm = () => {
               name='acctType'
               value={formData.acctType}
               onChange={handleChange}
+              readOnly
             />
           </div>
         </div>
@@ -288,24 +410,51 @@ const EditForm = () => {
       <div className='grid grid-cols-2 items-center gap-7 my-7 w-full '>
         <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%] '>
           <div className='w-[100%]'>
-            <SelectInput option={[]} name={''} label='Account Status' />
+            <SelectInput
+              option={statusOptions}
+              name={'status'}
+              label='Account Status'
+              value={formData.status}
+              onChange={handleChange}
+            />
           </div>
         </div>
         <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%]'>
           <div className='w-[100%]'>
-            <SelectInput option={[]} name={''} label='Alert Settings' />
+            <SelectInput
+              option={settingsOptions}
+              name={'settings'}
+              label='Alert Settings'
+              value={formData.settings}
+              onChange={handleChange}
+            />
           </div>
         </div>
       </div>
       <div className='grid grid-cols-2 items-center gap-7 my-7 w-full '>
         <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%] '>
           <div className='w-[100%]'>
-            <SelectInput option={[]} name={''} label='Currency' />
+            <SelectInput
+              option={Currencies.map((currency) => ({
+                value: currency.code,
+                label: currency.name,
+              }))}
+              name={'currency'}
+              label='Currency'
+              value={formData.currency}
+              onChange={handleChange}
+            />
           </div>
         </div>
         <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%]'>
           <div className='w-[100%]'>
-            <SelectInput option={[]} name={''} label='Error Settings' />
+            <SelectInput
+              option={errorOptions}
+              name={'error'}
+              label='Error Settings'
+              value={formData.error}
+              onChange={handleChange}
+            />
           </div>
         </div>
       </div>
@@ -315,6 +464,7 @@ const EditForm = () => {
           type={'submit'}
           bg={'#3c1414'}
           width={'100%'}
+          onClick={handleUpdateAccount}
         />
       </div>
     </div>

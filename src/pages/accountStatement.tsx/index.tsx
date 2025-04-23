@@ -164,7 +164,7 @@ const EditAccountStatement = () => {
         <HomeButton title={'Add'} type={'submit'} bg={'gray'} width={'100%'} />
         <div className='my-5 w-full'>
           <HomeButton
-            title={'Update Changes'}
+            title={'Update Statement'}
             type={'submit'}
             bg={'#3c1414'}
             width={'100%'}
