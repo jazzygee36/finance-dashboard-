@@ -109,14 +109,15 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<any[]>([]);
   const [userToDelete, setUserToDelete] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true); // ✅ Loading state
 
   useEffect(() => {
     const fetchUsers = async () => {
+      setLoading(true); // ✅ Start loading
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_BASE_URL}/user/all-users`
         );
-        // Ensure `id` is used instead of `_id`
         const normalizedUsers = res.data.map((user: any) => ({
           ...user,
           id: user._id,
@@ -124,6 +125,8 @@ const HomePage = () => {
         setUsers(normalizedUsers);
       } catch (error) {
         console.error('Error fetching users:', error);
+      } finally {
+        setLoading(false); // ✅ End loading
       }
     };
 
@@ -135,7 +138,6 @@ const HomePage = () => {
   const handleEditStatement = (user: any) =>
     navigate('/edit-statement', { state: { user } });
   const handleDelete = (user: any) => setUserToDelete(user);
-
   const confirmDelete = async () => {
     if (!userToDelete) return;
     try {
@@ -148,79 +150,86 @@ const HomePage = () => {
       console.error('Error deleting user:', error);
     }
   };
-
   const cancelDelete = () => setUserToDelete(null);
 
   return (
     <MainDashboard title={'Dashboard'}>
       <div className='mt-4 w-full'>
-        {/* Desktop Table */}
-        <div className='hidden md:block overflow-x-auto rounded-lg'>
-          <table className='min-w-[600px] w-full'>
-            <thead className='bg-gray-200'>
-              <tr>
-                <th className='p-2 font-medium text-left'>S/N</th>
-                <th className='p-2 font-medium text-left'>Name</th>
-                <th className='p-2 font-medium text-left'>Username</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <UserRow
-                  key={user.id}
-                  user={user}
-                  onEdit={handleEditForm}
-                  onEditStatement={handleEditStatement}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile View */}
-        <div className='md:hidden flex flex-col gap-4'>
-          {users.map((user, index) => (
-            <div
-              key={index}
-              className='border border-gray-200 rounded-lg p-4 shadow-sm bg-white'
-            >
-              <div className='flex items-center justify-between'>
-                <h4>Name</h4>
-                <h4 className='font-semibold text-gray-800'>
-                  {user.firstName} {user.lastName}
-                </h4>
-              </div>
-              <div className='flex items-center justify-between my-4'>
-                <h4>Username</h4>
-                <h4 className='font-semibold text-gray-800'>{user.username}</h4>
-              </div>
-              <div className='flex flex-col items-center justify-between gap-2 mt-4'>
-                <HomeButton
-                  title='Edit Account'
-                  type='submit'
-                  bg='gray'
-                  width='100%'
-                  onClick={() => handleEditForm(user)}
-                />
-                <HomeButton
-                  title='Account Statement'
-                  type='submit'
-                  bg='blue'
-                  width='100%'
-                  onClick={() => handleEditStatement(user)}
-                />
-                <HomeButton
-                  title='Delete'
-                  type='submit'
-                  bg='red'
-                  width='100%'
-                  onClick={() => handleDelete(user)}
-                />
-              </div>
+        {loading ? (
+          <div className='text-center py-8 text-lg font-medium'>Loading...</div> // ✅ Loading UI
+        ) : (
+          <>
+            {/* Desktop Table */}
+            <div className='hidden md:block overflow-x-auto rounded-lg'>
+              <table className='min-w-[600px] w-full'>
+                <thead className='bg-gray-200'>
+                  <tr>
+                    <th className='p-2 font-medium text-left'>S/N</th>
+                    <th className='p-2 font-medium text-left'>Name</th>
+                    <th className='p-2 font-medium text-left'>Username</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <UserRow
+                      key={user.id}
+                      user={user}
+                      onEdit={handleEditForm}
+                      onEditStatement={handleEditStatement}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))}
-        </div>
+
+            {/* Mobile View */}
+            <div className='md:hidden flex flex-col gap-4'>
+              {users.map((user, index) => (
+                <div
+                  key={index}
+                  className='border border-gray-200 rounded-lg p-4 shadow-sm bg-white'
+                >
+                  <div className='flex items-center justify-between'>
+                    <h4>Name</h4>
+                    <h4 className='font-semibold text-gray-800'>
+                      {user.firstName} {user.lastName}
+                    </h4>
+                  </div>
+                  <div className='flex items-center justify-between my-4'>
+                    <h4>Username</h4>
+                    <h4 className='font-semibold text-gray-800'>
+                      {user.username}
+                    </h4>
+                  </div>
+                  <div className='flex flex-col items-center justify-between gap-2 mt-4'>
+                    <HomeButton
+                      title='Edit Account'
+                      type='submit'
+                      bg='gray'
+                      width='100%'
+                      onClick={() => handleEditForm(user)}
+                    />
+                    <HomeButton
+                      title='Account Statement'
+                      type='submit'
+                      bg='blue'
+                      width='100%'
+                      onClick={() => handleEditStatement(user)}
+                    />
+                    <HomeButton
+                      title='Delete'
+                      type='submit'
+                      bg='red'
+                      width='100%'
+                      onClick={() => handleDelete(user)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <DeleteModal

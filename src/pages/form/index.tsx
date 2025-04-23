@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import HomeButton from '../../components/button';
 import HomeInput from '../../components/input';
 import SelectInput from '../../components/selectInput';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Currencies } from '../../utils/currency';
 import axios from 'axios';
 
@@ -10,6 +10,10 @@ const EditForm = () => {
   const location = useLocation();
   const user = location.state?.user;
   const userId = user?._id;
+  const [, setEditprofile] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
   console.log('userId', user._id);
 
   const genderOptions = [
@@ -59,23 +63,25 @@ const EditForm = () => {
     acctPin: '',
     tacCode: '',
     dwtcCode: '',
-    TXC: '',
+    txcCode: '',
     acctType: '',
     acctNumber: '',
-    currentBalance: '',
+    currentBallance: '',
     phoneNumber: '',
     country: '',
     state: '',
-    status: '',
+    isActive: '',
     currency: '',
-    settings: '',
-    error: '',
+    alertSettings: '',
+    errorSettings: '',
+    maritalStatus: '',
+
     // Add other fields as needed
   });
   useEffect(() => {
     if (user) {
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         username: user.username || '',
@@ -89,21 +95,22 @@ const EditForm = () => {
         acctPin: user.acctPin || '',
         tacCode: user.tacCode || '',
         dwtcCode: user.dwtcCode || '',
-        TXC: user.TXC || '',
+        txcCode: user.txcCode || '',
         acctType: user.acctType || '',
         acctNumber: user.acctNumber || '',
-        currentBalance: user.currentBalance || '',
+        currentBallance: user.currentBallance || '',
         phoneNumber: user.phoneNumber || '',
         country: user.country || '',
         state: user.state || '',
-        status: user.status || '',
+        isActive: user.isActive || '',
         currency: user.currency || '',
-        settings: user.settings || '',
-        error: user.error || '',
-        // Map other fields accordingly
-      });
+        alertSettings: user.alertSettings || '',
+        errorSettings: user.errorSettings || '',
+        maritalStatus: user.maritalStatus || '',
+      }));
     }
   }, [user]);
+
   const formattedDOB = formData.dob
     ? new Date(formData.dob).toISOString().split('T')[0]
     : '';
@@ -113,17 +120,20 @@ const EditForm = () => {
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const [editProfile, setEditprofile] = useState('');
-  console.log('editProfile', editProfile);
 
   const handleUpdateAccount = async () => {
+    setIsLoading(true);
     try {
       const res = await axios.patch(
-        `${import.meta.env.VITE_BASE_URL}/user/update-user/${userId}`
+        `${import.meta.env.VITE_BASE_URL}/user/update-user/${userId}`,
+        formData
       );
       setEditprofile(res.data.message);
+      navigate('/dashboard');
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error updating user:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -139,7 +149,7 @@ const EditForm = () => {
               type={'text'}
               placeholder={''}
               label='Names'
-              name='name'
+              // name='name'
               value={`${formData.firstName} ${formData.lastName}`.trim()}
               onChange={handleChange}
               readOnly
@@ -180,7 +190,7 @@ const EditForm = () => {
               option={maritalStatusOptions}
               name='maritalStatus'
               label='Marital Status'
-              // value={formData.maritalStatus}
+              value={formData.maritalStatus}
               onChange={handleChange}
             />
           </div>
@@ -344,8 +354,7 @@ const EditForm = () => {
             <HomeInput
               type={'text'}
               placeholder={''}
-              label='Transfer DWTC code
-'
+              label='Transfer DWTC code'
               name='dwtcCode'
               value={formData.dwtcCode}
               onChange={handleChange}
@@ -360,9 +369,8 @@ const EditForm = () => {
               type={'text'}
               placeholder={''}
               label='Transfer TXC code'
-              name='tacCode
-'
-              value={formData.TXC}
+              name='txcCode'
+              value={formData.txcCode}
               onChange={handleChange}
             />
           </div>
@@ -400,8 +408,8 @@ const EditForm = () => {
               type={'text'}
               placeholder={''}
               label='Current Balance'
-              name='currentBalance'
-              value={formData.currentBalance}
+              name='currentBallance'
+              value={formData.currentBallance}
               onChange={handleChange}
             />
           </div>
@@ -412,9 +420,9 @@ const EditForm = () => {
           <div className='w-[100%]'>
             <SelectInput
               option={statusOptions}
-              name={'status'}
+              name={'isActive'}
               label='Account Status'
-              value={formData.status}
+              value={formData.isActive}
               onChange={handleChange}
             />
           </div>
@@ -423,9 +431,9 @@ const EditForm = () => {
           <div className='w-[100%]'>
             <SelectInput
               option={settingsOptions}
-              name={'settings'}
+              name={'alertSettings'}
               label='Alert Settings'
-              value={formData.settings}
+              value={formData.alertSettings}
               onChange={handleChange}
             />
           </div>
@@ -450,9 +458,9 @@ const EditForm = () => {
           <div className='w-[100%]'>
             <SelectInput
               option={errorOptions}
-              name={'error'}
+              name={'errorSettings'}
               label='Error Settings'
-              value={formData.error}
+              value={formData.errorSettings}
               onChange={handleChange}
             />
           </div>
@@ -460,7 +468,7 @@ const EditForm = () => {
       </div>
       <div className='w-full flex flex-col m-auto justify-center items-center md:w-[30%] my-4'>
         <HomeButton
-          title={'Update Changes'}
+          title={isLoading ? 'Processing...' : 'Update changes'}
           type={'submit'}
           bg={'#3c1414'}
           width={'100%'}
