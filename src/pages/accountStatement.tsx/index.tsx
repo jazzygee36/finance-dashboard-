@@ -1,181 +1,227 @@
 import { useEffect, useState } from 'react';
 import HomeButton from '../../components/button';
 import HomeInput from '../../components/input';
-import SelectInput from '../../components/selectInput';
 import { useLocation } from 'react-router-dom';
+
+const initialFormState = {
+  name: '',
+  username: '',
+  email: '',
+  dob: '',
+  gender: '',
+  occup: '',
+  address: '',
+  pwd: '',
+  otp: '',
+  pin: '',
+  Tac: '',
+  DWTC: '',
+  TXC: '',
+  acctType: '',
+  acctNumber: '',
+  currentBalance: '',
+};
 
 const EditAccountStatement = () => {
   const location = useLocation();
   const user = location.state?.user;
 
-  const [formData, setFormData] = useState({
-    name: '',
-    username: '',
-    email: '',
-    dob: '',
-    gender: '',
-    occup: '',
-    address: '',
-    pwd: '',
-    otp: '',
-    pin: '',
-    Tac: '',
-    DWTC: '',
-    TXC: '',
-    acctType: '',
-    acctNumber: '',
-    currentBalance: '',
-    // Add other fields as needed
-  });
+  const [formData, setFormData] = useState(initialFormState);
+  const [newStatements, setNewStatements] = useState<
+    (typeof initialFormState)[]
+  >([]);
+  const [showEdit, setShowEdit] = useState(true);
+
   useEffect(() => {
     if (user) {
-      setFormData({
-        ...formData,
-        name: user.name || '',
-        username: user.username || '',
-        email: user.email || '',
-        dob: user.dob || '',
-        pwd: user.pwd || '',
-        address: user.address || '',
-        gender: user.gender || '',
-        occup: user.occup || '',
-        otp: user.otp || '',
-        pin: user.pin || '',
-        Tac: user.Tac || '',
-        DWTC: user.DWTC || '',
-        TXC: user.TXC || '',
-        acctType: user.acctType || '',
-        acctNumber: user.acctNumber || '',
-        currentBalance: user.currentBalance || '',
-        // Map other fields accordingly
-      });
+      setFormData({ ...initialFormState, ...user });
     }
   }, [user]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e: any, index: number | null = null) => {
+    const { name, value } = e.target;
+
+    if (index === null) {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setNewStatements((prev) =>
+        prev.map((item, i) => (i === index ? { ...item, [name]: value } : item))
+      );
+    }
   };
+
+  const addNewStatement = () => {
+    setNewStatements((prev) => [...prev, { ...initialFormState }]);
+  };
+
+  const removeStatement = (index: any) => {
+    setNewStatements((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <div className='p-4 md:p-6'>
-      <h1 className='font-bold my-8  block text-center text-gray-900'>
-        EDIT STATEMENT
-      </h1>
-      <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-7 w-full '>
-        <div className='   flex items-center gap-1 md:gap-10 w-[100%]'>
-          <div className='w-full'>
-            <HomeInput
-              type={'text'}
-              placeholder={''}
-              label='Username'
-              name='username'
-              value={formData.username}
-              onChange={handleChange}
-              readOnly={true}
-            />
-          </div>
-        </div>
-        {/* <div className='   flex items-center gap-1 md:gap-10 w-[100%]'> */}
-        <div className='   flex items-center gap-1 md:gap-10 w-[100%]'>
-          <div className='w-[100%]'>
-            <HomeInput
-              type={'text'}
-              placeholder={''}
-              label='Beneficiary'
-              name='beneficiary'
-              // value={formData.dob}
-              // onChange={handleChange}
-            />
-          </div>
-          {/* </div> */}
-        </div>
-      </div>
+      {/* Accordion for Existing Statement */}
+      <div className='mb-6'>
+        <button
+          onClick={() => setShowEdit((prev) => !prev)}
+          className='text-left w-full text-lg font-semibold bg-gray-100 px-4 py-2 rounded-md shadow'
+        >
+          {showEdit ? 'Hide Existing Statement ▲' : 'Show Existing Statement ▼'}
+        </button>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-7  items-center  mt-7 w-full'>
-        <div className='   flex items-center gap-1 md:gap-10 w-[100%] '>
-          <div className='w-[100%]'>
-            <div className='w-[100%]'>
+        {showEdit && (
+          <div className='border border-gray-300 p-4 mt-2 rounded-md'>
+            <h2 className='text-center font-bold mb-4'>EDIT STATEMENT</h2>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <HomeInput
-                type={'text'}
+                type='text'
+                label='Username'
+                // name='username'
+                // value={formData.username}
+                // onChange={(e) => handleChange(e)}
                 placeholder={''}
+                readOnly
+              />
+              <HomeInput
+                type='text'
+                label='Beneficiary'
+                // name='beneficiary'
+                // value={formData.acctNumber}
+                // onChange={(e) => handleChange(e)}
+                placeholder={''}
+              />
+            </div>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 my-7'>
+              <HomeInput
+                type='text'
                 label='Account No.'
-                //   name='acctNumber'
-                //   value={formData.acctNumber}
-                //   onChange={handleChange}
+                name='acctNumber'
+                value={formData.acctNumber}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
+              />
+              <HomeInput
+                type='text'
+                label='Bank'
+                name='bank'
+                value={formData.acctNumber}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
+              />
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 my-7'>
+              <HomeInput
+                type='text'
+                label='Amount'
+                name='amoun'
+                value={formData.username}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
+              />
+              <HomeInput
+                type='text'
+                label='Date'
+                name='date'
+                value={formData.acctNumber}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
               />
             </div>
           </div>
-        </div>
-        <div className='   flex items-center gap-1 md:gap-10 w-[100%]'>
-          <div className='w-[100%]'>
-            <HomeInput
-              type={'text'}
-              placeholder={''}
-              label='Bank'
-              name='bank'
-              //   value={formData.address}
-              //   onChange={handleChange}
+        )}
+      </div>
+
+      {/* Add Statement Button */}
+
+      {/* Dynamic New Statements */}
+      {newStatements.map((_statement, index) => (
+        <div key={index} className='border border-blue-300 p-4 rounded-md mb-6'>
+          <h2 className='text-blue-700 font-bold text-center mb-4'>
+            NEW STATEMENT #{index + 1}
+          </h2>
+
+          <form action=''>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <HomeInput
+                type='text'
+                label='Username'
+                name='username'
+                value={formData.username}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
+                readOnly
+              />
+              <HomeInput
+                type='text'
+                label='Beneficiary'
+                name='beneficiary'
+                value={formData.acctNumber}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
+              />
+            </div>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 my-7'>
+              <HomeInput
+                type='text'
+                label='Account No.'
+                name='acctNumber'
+                value={formData.acctNumber}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
+              />
+              <HomeInput
+                type='text'
+                label='Bank'
+                name='bank'
+                value={formData.acctNumber}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
+              />
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 my-7'>
+              <HomeInput
+                type='text'
+                label='Amoun'
+                name='amoun'
+                value={formData.username}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
+              />
+              <HomeInput
+                type='text'
+                label='Date'
+                name='date'
+                value={formData.acctNumber}
+                onChange={(e) => handleChange(e)}
+                placeholder={''}
+              />
+            </div>
+          </form>
+
+          <div className='mt-4 flex gap-4 justify-center'>
+            <HomeButton title='Save' type='submit' bg='green' width={''} />
+            <HomeButton
+              title='Remove'
+              type='button'
+              bg='red'
+              onClick={() => removeStatement(index)}
+              width={''}
             />
           </div>
         </div>
+      ))}
+      <div className='mt-4 flex justify-center mb-5'>
+        <HomeButton title='Update' type='submit' bg='#3c1414' width={''} />
       </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-7 my-7  w-full'>
-        <div className='  flex items-center gap-1 md:gap-10 w-[100%] '>
-          <div className='w-[100%]'>
-            <HomeInput type={'text'} placeholder={''} label='Amount' />
-          </div>
-        </div>
-
-        <div className='w-full'>
-          <HomeInput
-            type={'text'}
-            placeholder={''}
-            label='Date'
-            name='date'
-            // value={formData.email}
-            // onChange={handleChange}
-          />
-        </div>
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-2 items-center gap-7  w-full '>
-        <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%] '>
-          <div className='w-[100%]'>
-            <HomeInput
-              type={'text'}
-              placeholder={''}
-              label='Type'
-              name='type'
-              //   value={formData.username}
-              //   onChange={handleChange}
-            />
-          </div>
-        </div>
-        <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%]'>
-          <div className='w-[100%]'>
-            <SelectInput option={[]} name={''} label='Account Status' />
-          </div>
-        </div>
-      </div>
-
-      <div className=' grid grid-cols-1 md:grid-cols-3  md:gap-6  justify-center items-center  my-4'>
-        <HomeButton title={'Add'} type={'submit'} bg={'gray'} width={'100%'} />
-        <div className='my-5 w-full'>
-          <HomeButton
-            title={'Update Statement'}
-            type={'submit'}
-            bg={'#3c1414'}
-            width={'100%'}
-          />
-        </div>
-
+      <div className='mb-4 flex justify-center'>
         <HomeButton
-          title={'Cancle'}
-          type={'submit'}
-          bg={'red'}
-          width={'100%'}
+          title='Add New Statement'
+          type='button'
+          onClick={addNewStatement}
+          bg='gray'
+          width={''}
         />
       </div>
     </div>
