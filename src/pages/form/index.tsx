@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Currencies } from '../../utils/currency';
 import axios from 'axios';
 import Modal from '../../components/modal';
+import Toast from '../../components/toast';
 
 const EditForm = () => {
   const location = useLocation();
@@ -41,6 +42,8 @@ const EditForm = () => {
     { value: 'DWTC-error', label: 'DWTC-Error' },
     { value: 'Tax-error', label: 'Tax-Error' },
   ];
+
+  const fundStatusOptions = [{ value: 'Completed', label: 'Completed' }];
   const maritalStatusOptions = [
     { value: 'Null', label: 'Null' },
     { value: 'Single', label: 'Single' },
@@ -48,6 +51,22 @@ const EditForm = () => {
     { value: 'Divorced', label: 'Divorced' },
     { value: 'Widowed', label: 'Widowed' },
   ];
+
+  const [fundAcctForm, setFundAcctForm] = useState({
+    beneficiary: '',
+    senderAcctNumber: '',
+    senderBank: '',
+    amount: '',
+    status: '',
+  });
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type?: 'success' | 'error' | 'info';
+  } | null>(null);
+  const showToast = (message: string, type?: 'success' | 'error' | 'info') => {
+    setToast({ message, type });
+  };
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -78,6 +97,7 @@ const EditForm = () => {
 
     // Add other fields as needed
   });
+
   useEffect(() => {
     if (user) {
       setFormData((prev) => ({
@@ -120,7 +140,11 @@ const EditForm = () => {
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
+  const handleFundChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setFundAcctForm({ ...fundAcctForm, [e.target.name]: e.target.value });
+  };
   const handleUpdateAccount = async () => {
     setIsLoading(true);
     try {
@@ -137,8 +161,40 @@ const EditForm = () => {
     }
   };
 
+  const handleFundAccount = async () => {
+    setIsLoading(true);
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/user/create-statement`,
+        fundAcctForm
+      );
+
+      setFundAcctForm({
+        beneficiary: '',
+        senderAcctNumber: '',
+        senderBank: '',
+        amount: '',
+        status: '',
+      });
+      setIsOpen(false);
+
+      showToast(`Account Funded`, 'success');
+    } catch (error) {
+      console.error('Error updating user:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className='p-4 md:p-6'>
         <h1 className='font-bold my-8  block text-center text-gray-900'>
           ADMIN SETTINGS
@@ -493,9 +549,9 @@ const EditForm = () => {
                 type={'text'}
                 placeholder={''}
                 label='Sender name'
-                // name='acctNumber'
-                // value={formData.acctNumber}
-                // onChange={handleChange}
+                name='beneficiary'
+                value={fundAcctForm.beneficiary}
+                onChange={handleFundChange}
               />
             </div>
           </div>
@@ -505,9 +561,9 @@ const EditForm = () => {
                 type={'text'}
                 placeholder={''}
                 label='Sender account number'
-                // name='currentBallance'
-                // value={formData.currentBallance}
-                // onChange={handleChange}
+                name='senderAcctNumber'
+                value={fundAcctForm.senderAcctNumber}
+                onChange={handleFundChange}
               />
             </div>
           </div>
@@ -519,9 +575,9 @@ const EditForm = () => {
                 type={'text'}
                 placeholder={''}
                 label='Sender bank'
-                // name='acctNumber'
-                // value={formData.acctNumber}
-                // onChange={handleChange}
+                name='senderBank'
+                value={fundAcctForm.senderBank}
+                onChange={handleFundChange}
               />
             </div>
           </div>
@@ -531,11 +587,22 @@ const EditForm = () => {
                 type={'text'}
                 placeholder={''}
                 label='Amount'
-                // name='currentBallance'
-                // value={formData.currentBallance}
-                // onChange={handleChange}
+                name='amount'
+                value={fundAcctForm.amount}
+                onChange={handleFundChange}
               />
             </div>
+          </div>
+        </div>
+        <div className='  mb-4 flex items-center gap-1 md:gap-10  w-[100%]'>
+          <div className='w-[100%]'>
+            <SelectInput
+              option={fundStatusOptions}
+              name={'status'}
+              label='Status'
+              value={fundAcctForm.status}
+              onChange={handleFundChange}
+            />
           </div>
         </div>
         <div className='w-full flex flex-col   gap-4  justify-center items-center md:w-[30%] my-4'>
@@ -544,7 +611,7 @@ const EditForm = () => {
             type={'submit'}
             bg={'blue'}
             width={'100%'}
-            onClick={() => setIsOpen(true)}
+            onClick={handleFundAccount}
           />
         </div>
       </Modal>

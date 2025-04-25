@@ -183,8 +183,8 @@ const EditAccountStatement = () => {
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6 my-7'>
               <HomeInput
                 type='text'
-                label='Amoun'
-                name='amoun'
+                label='Amount'
+                name='amount'
                 value={formData.username}
                 onChange={(e) => handleChange(e)}
                 placeholder={''}
