@@ -600,8 +600,8 @@ const EditForm = () => {
               option={fundStatusOptions}
               name={'status'}
               label='Status'
-              value={fundAcctForm.status}
-              onChange={handleFundChange}
+              value={'Completed'}
+              // onChange={handleFundChange}
             />
           </div>
         </div>
