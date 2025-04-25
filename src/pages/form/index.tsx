@@ -57,7 +57,7 @@ const EditForm = () => {
     senderAcctNumber: '',
     senderBank: '',
     amount: '',
-    status: '',
+    status: 'Completed',
   });
 
   const [toast, setToast] = useState<{
@@ -174,7 +174,7 @@ const EditForm = () => {
         senderAcctNumber: '',
         senderBank: '',
         amount: '',
-        status: '',
+        status: 'Completed',
       });
       setIsOpen(false);
 
