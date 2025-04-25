@@ -71,22 +71,51 @@ const EditAccountStatement = () => {
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [deletingLoading, setDeletingLoading] = useState<boolean>(false);
 
+  const addNewStatement = () => {
+    const newStatement: Statement = {
+      id: `${Date.now()}`,
+      updatedAt: new Date().toISOString(),
+      beneficiary: '',
+      senderAcctNumber: '',
+      senderBank: '',
+      acctType: '',
+      amount: '',
+      status: '',
+      date: '',
+      receipt: '',
+      type: '',
+    };
+
+    setAllStatements((prev) => [...prev, newStatement]);
+  };
+
   const handleUpdateStatements = async () => {
-    setActionLoading(true); // Start loading
+    setActionLoading(true);
     try {
       for (const statement of allStatements) {
         const { id, updatedAt, ...cleanedStatement } = statement;
-        await axios.patch(
-          `${import.meta.env.VITE_BASE_URL}/user/update-statement/${id}`,
-          cleanedStatement
-        );
+
+        if (id.length < 24) {
+          // Probably a new statement — POST to create
+          await axios.post(
+            `${import.meta.env.VITE_BASE_URL}/user/create-statement`,
+            cleanedStatement
+          );
+        } else {
+          // Existing statement — PATCH to update
+          await axios.patch(
+            `${import.meta.env.VITE_BASE_URL}/user/update-statement/${id}`,
+            cleanedStatement
+          );
+        }
       }
+
       showToast(`All statements updated successfully`, 'success');
     } catch (error) {
       console.error('Error updating statements:', error);
       showToast('Failed to update statements', 'error');
     } finally {
-      setActionLoading(false); // Stop loading
+      setActionLoading(false);
     }
   };
 
@@ -117,6 +146,7 @@ const EditAccountStatement = () => {
           res.data.map((s: any) => ({
             ...s,
             id: s._id, // make sure `id` exists
+            updatedAt: new Date(s.updatedAt).toLocaleDateString(),
           }))
         );
       } catch (error) {
@@ -198,7 +228,7 @@ const EditAccountStatement = () => {
                     <HomeInput
                       type='text'
                       label='Account No.'
-                      name={`acctNumber`}
+                      name={`senderAcctNumber`}
                       value={statement.senderAcctNumber}
                       placeholder=''
                       onChange={(e: any) => handleStatementChange(e, index)}
@@ -206,7 +236,7 @@ const EditAccountStatement = () => {
                     <HomeInput
                       type='text'
                       label='Bank'
-                      name={`bank`}
+                      name={`senderBank`}
                       value={statement.senderBank}
                       placeholder=''
                       onChange={(e: any) => handleStatementChange(e, index)}
@@ -276,7 +306,7 @@ const EditAccountStatement = () => {
           onClick={handleUpdateStatements}
         />
       </div>
-      {/* <div className='mb-4 flex justify-center'>
+      <div className='mb-4 flex justify-center'>
         <HomeButton
           title='Add New Statement'
           type='button'
@@ -284,7 +314,7 @@ const EditAccountStatement = () => {
           bg='gray'
           width={''}
         />
-      </div> */}
+      </div>
     </div>
   );
 };
