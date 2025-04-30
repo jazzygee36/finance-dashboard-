@@ -165,7 +165,7 @@ const EditForm = () => {
     setIsLoading(true);
     try {
       await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/user/create-statement`,
+        `${import.meta.env.VITE_BASE_URL}/user/${userId}/create-statement`,
         fundAcctForm
       );
 

@@ -146,7 +146,7 @@ const EditAccountStatement = () => {
   useEffect(() => {
     const handleAllStatements = async () => {
       const userId = user._id;
-      console.log(userId);
+
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_BASE_URL}/user/${userId}/statements`
