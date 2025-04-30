@@ -60,6 +60,8 @@ const EditAccountStatement = () => {
   const [showEdit] = useState(true);
 
   const [allStatements, setAllStatements] = useState<Statement[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const [loading, setLoading] = useState<boolean>(true);
   const [toast, setToast] = useState<{
     message: string;
@@ -69,7 +71,6 @@ const EditAccountStatement = () => {
     setToast({ message, type });
   };
   const [actionLoading, setActionLoading] = useState<boolean>(false);
-  const [deletingLoading, setDeletingLoading] = useState<boolean>(false);
 
   const addNewStatement = () => {
     const newStatement: Statement = {
@@ -90,22 +91,29 @@ const EditAccountStatement = () => {
   };
 
   const handleUpdateStatements = async () => {
+    if (!user || !user._id) {
+      showToast('User not found', 'error');
+      return;
+    }
+
     setActionLoading(true);
     try {
       for (const statement of allStatements) {
         const { id, updatedAt, ...cleanedStatement } = statement;
+        const statementWithUser = { ...cleanedStatement, userId: user._id }; // attach userId
 
         if (id.length < 24) {
-          // Probably a new statement — POST to create
+          // POST to create new statement
+          const userId = user._id;
           await axios.post(
-            `${import.meta.env.VITE_BASE_URL}/user/create-statement`,
-            cleanedStatement
+            `${import.meta.env.VITE_BASE_URL}/user/${userId}/create-statement`,
+            statementWithUser
           );
         } else {
-          // Existing statement — PATCH to update
+          // PATCH to update existing statement
           await axios.patch(
             `${import.meta.env.VITE_BASE_URL}/user/update-statement/${id}`,
-            cleanedStatement
+            statementWithUser
           );
         }
       }
@@ -120,27 +128,28 @@ const EditAccountStatement = () => {
   };
 
   const handleDeleteStatement = async (id: string) => {
-    setDeletingLoading(true); // Start loading
+    setDeletingId(id);
     try {
       await axios.delete(
         `${import.meta.env.VITE_BASE_URL}/user/delete-statement/${id}`
       );
-
       setAllStatements((prev) => prev.filter((s) => s.id !== id));
       showToast('Statement deleted successfully', 'success');
     } catch (error) {
       console.error('Error deleting statement:', error);
       showToast('Failed to delete statement', 'error');
     } finally {
-      setDeletingLoading(false); // Stop loading
+      setDeletingId(null);
     }
   };
 
   useEffect(() => {
     const handleAllStatements = async () => {
+      const userId = user._id;
+      console.log(userId);
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/user/all-statements`
+          `${import.meta.env.VITE_BASE_URL}/user/${userId}/statements`
         );
         setAllStatements(
           res.data.map((s: any) => ({
@@ -282,7 +291,9 @@ const EditAccountStatement = () => {
                   <div className='mt-4 flex justify-center mb-5'>
                     <HomeButton
                       title={
-                        deletingLoading ? 'Deleting...' : 'Delete Statement'
+                        deletingId === statement.id
+                          ? 'Deleting...'
+                          : 'Delete Statement'
                       }
                       type='submit'
                       bg='red'
