@@ -8,9 +8,23 @@ import axios from 'axios';
 import Modal from '../../components/modal';
 import Toast from '../../components/toast';
 
+interface Statement {
+  updatedAt: string;
+  id: string;
+  beneficiary: string;
+  senderAcctNumber: string;
+  senderBank: string;
+  acctType: string;
+  amount: string;
+  status: string;
+  date: string;
+  receipt: string;
+}
+
 const EditForm = () => {
   const location = useLocation();
   const user = location.state?.user;
+
   const userId = user?._id;
   const [, setEditprofile] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +81,8 @@ const EditForm = () => {
   const showToast = (message: string, type?: 'success' | 'error' | 'info') => {
     setToast({ message, type });
   };
+  const [allStatements, setAllStatements] = useState<Statement[]>([]);
+  const [, setLoading] = useState<boolean>(false);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -186,6 +202,31 @@ const EditForm = () => {
     }
   };
 
+  useEffect(() => {
+    const handleAllStatements = async () => {
+      setLoading(true);
+      const userId = user.id;
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/user/${userId}/statements`
+        );
+        setAllStatements(res.data);
+      } catch (error) {
+        console.error('Error updating user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    handleAllStatements();
+  }, []);
+  const balance = allStatements.reduce((sum, statement) => {
+    if (statement.status === 'Completed') {
+      return sum + parseFloat(statement.amount);
+    } else if (statement.status === 'Pending') {
+      return sum - parseFloat(statement.amount);
+    }
+    return sum;
+  }, 0);
   return (
     <>
       {toast && (
@@ -466,7 +507,7 @@ const EditForm = () => {
                 placeholder={''}
                 label='Current Balance'
                 name='currentBallance'
-                value={formData.currentBallance}
+                value={balance.toLocaleString()}
                 onChange={handleChange}
               />
             </div>
