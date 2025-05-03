@@ -72,6 +72,14 @@ const EditAccountStatement = () => {
   };
   const [actionLoading, setActionLoading] = useState<boolean>(false);
 
+  const formatDateForInput = (dateString: string): string => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const addNewStatement = () => {
     const newStatement: Statement = {
       id: `${Date.now()}`,
@@ -99,7 +107,8 @@ const EditAccountStatement = () => {
     setActionLoading(true);
     try {
       for (const statement of allStatements) {
-        const { id, updatedAt, ...cleanedStatement } = statement;
+        // const { id, updatedAt, ...cleanedStatement } = statement;
+        const { id, ...cleanedStatement } = statement;
         const statementWithUser = { ...cleanedStatement, userId: user._id }; // attach userId
 
         if (id.length < 24) {
@@ -265,7 +274,7 @@ const EditAccountStatement = () => {
                       type='text'
                       label='Date'
                       name={`date`}
-                      value={statement.updatedAt}
+                      value={formatDateForInput(statement.date)}
                       placeholder=''
                       onChange={(e: any) => handleStatementChange(e, index)}
                     />
